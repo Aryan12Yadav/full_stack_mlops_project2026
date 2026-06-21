@@ -6,6 +6,11 @@ __pycache__/
 # C extensions
 *.so
 
+# Project Artifacts
+artifact/
+artifacts/
+work.txt
+
 # Distribution / packaging
 .Python
 build/

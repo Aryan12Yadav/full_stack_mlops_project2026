@@ -40,5 +40,9 @@ def configure_logger():
     logger.addHandler(file_handler)
     logger.addHandler(console_handler)
 
+    # Suppress verbose debug logs from third-party libraries
+    logging.getLogger("pymongo").setLevel(logging.WARNING)
+    logging.getLogger("urllib3").setLevel(logging.WARNING)
+
 # Initialize logger configuration on import
 configure_logger()
