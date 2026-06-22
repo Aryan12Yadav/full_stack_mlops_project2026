@@ -45,13 +45,41 @@ class Proj1Data:
                 collection = self.mongo_client[database_name][collection_name]
 
             # Convert collection data to DataFrame and preprocess
-            print("Fetching data from mongoDB")
-            df = pd.DataFrame(list(collection.find()))
-            print(f"Data fecthed with len: {len(df)}")
+            print("Fetching data from mongoDB in batches to avoid timeout...")
+            records = []
+            last_id = None
+            batch_size = 10000
+
+            while True:
+                query = {}
+                if last_id is not None:
+                    query['_id'] = {'$gt': last_id}
+                
+                # Fetch a batch of records with retry logic
+                batch = None
+                retries = 3
+                for attempt in range(retries):
+                    try:
+                        batch = list(collection.find(query).sort('_id', 1).limit(batch_size))
+                        break
+                    except Exception as e:
+                        import time
+                        print(f"Network error on batch fetch (attempt {attempt+1}/{retries}): {e}")
+                        time.sleep(3)
+                        if attempt == retries - 1:
+                            raise e
+                
+                if not batch:
+                    break
+                    
+                records.extend(batch)
+                last_id = batch[-1]['_id']
+                print(f"Fetched {len(records)} records so far...")
+
+            df = pd.DataFrame(records)
+            print(f"Data fecthed with total len: {len(df)}")
             if "_id" in df.columns.to_list():
                 df = df.drop("_id", axis=1)
-            if "id" in df.columns.to_list():
-                df = df.drop("id", axis=1)
             df.replace({"na":np.nan},inplace=True)
             return df
 
