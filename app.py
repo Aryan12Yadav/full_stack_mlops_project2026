@@ -10,8 +10,8 @@ from typing import Optional
 
 # Importing constants and pipeline modules from the project
 from src.constants import APP_HOST, APP_PORT
-from src.pipline.prediction_pipeline import VehicleData, VehicleDataClassifier
-from src.pipline.training_pipeline import TrainPipeline
+from src.pipeline.prediction_pipeline import VehicleData, VehicleDataClassifier
+from src.pipeline.training_pipeline import TrainPipeline
 
 # Initialize FastAPI application
 app = FastAPI()
@@ -79,7 +79,7 @@ async def index(request: Request):
     Renders the main HTML form page for vehicle data input.
     """
     return templates.TemplateResponse(
-            "vehicledata.html",{"request": request, "context": "Rendering"})
+            request=request, name="vehicledata.html", context={"context": "Rendering"})
 
 # Route to trigger the model training process
 @app.get("/train")
@@ -133,8 +133,9 @@ async def predictRouteClient(request: Request):
 
         # Render the same HTML page with the prediction result
         return templates.TemplateResponse(
-            "vehicledata.html",
-            {"request": request, "context": status},
+            request=request,
+            name="vehicledata.html",
+            context={"context": status},
         )
         
     except Exception as e:
